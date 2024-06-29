@@ -7,27 +7,58 @@ const choices = ["rock", "paper", "scissors"];
 
 const getRandomChoice = () => choices[Math.floor(Math.random() * choices.length)];
 
-const getResult = (userChoice, computerChoice) => {
-  if (userChoice === computerChoice) return "draw";
-  if (
-    (userChoice === "rock" && computerChoice === "scissors") ||
-    (userChoice === "paper" && computerChoice === "rock") ||
-    (userChoice === "scissors" && computerChoice === "paper")
-  ) {
-    return "win";
-  }
-  return "lose";
-};
-
 const Index = () => {
   const [userChoice, setUserChoice] = useState(null);
   const [computerChoice, setComputerChoice] = useState(null);
   const [result, setResult] = useState(null);
   const [userScore, setUserScore] = useState(0);
   const [computerScore, setComputerScore] = useState(0);
+  const [draws, setDraws] = useState(0);
+  const [userChoices, setUserChoices] = useState([]);
+
+  const getResult = (userChoice, computerChoice) => {
+    if (userChoice === computerChoice) {
+      setDraws(draws + 1);
+      return "draw";
+    }
+    if (
+      (userChoice === "rock" && computerChoice === "scissors") ||
+      (userChoice === "paper" && computerChoice === "rock") ||
+      (userChoice === "scissors" && computerChoice === "paper")
+    ) {
+      return "win";
+    }
+    return "lose";
+  };
+
+  const analyzePattern = (choices) => {
+    if (choices.length < 3) return getRandomChoice();
+    const lastThreeChoices = choices.slice(-3);
+    const pattern = lastThreeChoices.join("-");
+    switch (pattern) {
+      case "rock-rock-rock":
+      case "rock-rock-paper":
+      case "rock-paper-rock":
+      case "rock-paper-paper":
+        return "paper";
+      case "paper-paper-paper":
+      case "paper-paper-scissors":
+      case "paper-scissors-paper":
+      case "paper-scissors-scissors":
+        return "scissors";
+      case "scissors-scissors-scissors":
+      case "scissors-scissors-rock":
+      case "scissors-rock-scissors":
+      case "scissors-rock-rock":
+        return "rock";
+      default:
+        return getRandomChoice();
+    }
+  };
 
   const handleChoice = (choice) => {
-    const computerChoice = getRandomChoice();
+    setUserChoices([...userChoices, choice]);
+    const computerChoice = analyzePattern([...userChoices, choice]);
     const result = getResult(choice, computerChoice);
 
     setUserChoice(choice);
@@ -44,6 +75,7 @@ const Index = () => {
   const resetScores = () => {
     setUserScore(0);
     setComputerScore(0);
+    setDraws(0);
   };
 
   return (
@@ -81,6 +113,9 @@ const Index = () => {
             </p>
             <p>
               Computer Score: <strong>{computerScore}</strong>
+            </p>
+            <p>
+              Draws: <strong>{draws}</strong>
             </p>
           </div>
           <Button variant="outline" onClick={resetScores}>
